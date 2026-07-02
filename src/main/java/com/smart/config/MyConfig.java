@@ -62,13 +62,14 @@ public class MyConfig {
 	    http
 	        .authorizeHttpRequests(authorize -> authorize
 	            .requestMatchers("/admin/**").hasRole("ADMIN")
-	            .requestMatchers("/signup", "/signin").permitAll() // Ensure the signin page is accessible without authentication
+	            .requestMatchers("/", "/about", "/signup", "/signin", "/do_register").permitAll()
+	            .requestMatchers("/css/**", "/js/**", "/img/**", "/webjars/**").permitAll() // allow static assets
 	            .anyRequest().authenticated()
 	        )
 	        .formLogin(form -> form
 	            .loginPage("/signin") 
 	            .loginProcessingUrl("/dologin")// Custom login page
-	            .defaultSuccessUrl("/user/index") // Default URL after successful login
+	            .defaultSuccessUrl("/user/index", true) // Always go to dashboard after login, ignore saved requests
 	            .permitAll() // Allow everyone to access the login page
 	        )/*
 	        .logout(logout -> logout

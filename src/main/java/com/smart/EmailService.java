@@ -8,16 +8,23 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
 
+    @Value("${spring.mail.username}")
+    private String fromEmail;
+
+    @Value("${spring.mail.password}")
+    private String appPassword;
+
     public boolean sendEmail(String subject, String message, String to) {
 
     	boolean f = false;
     	
-        String from = "rajnishantbg@gmail.com";
+        String from = fromEmail;
         String host = "smtp.gmail.com";
 
         // Set properties
@@ -34,8 +41,7 @@ public class EmailService {
         Session session = Session.getInstance(properties, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                // Use your Gmail app password here
-                return new PasswordAuthentication("rajnishantbg@gmail.com", "gxtkrbnkqmlszkqp");
+                return new PasswordAuthentication(fromEmail, appPassword);
             }
         });
 
