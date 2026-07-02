@@ -170,7 +170,7 @@ public class UserController {
 	//showing particular contact details
 	
 	@RequestMapping("/{cId}/contact")
-	public String showContactDetail(@PathVariable("cId") Integer cId, Model model, Principal principal )
+	public String showContactDetail(@PathVariable("cId") Integer cId, Model model, Principal principal, HttpSession session )
 	{
 		System.out.println("CID" + cId);
 		
@@ -184,6 +184,11 @@ public class UserController {
 		{
 			model.addAttribute("contact", contact);
 			model.addAttribute("title", contact.getName());
+		}
+		else
+		{
+			session.setAttribute("message", new Message("You are not authorized to view this contact", "danger"));
+			return "redirect:/user/show-contacts/0";
 		}
 		
 		return "contact_detail";
@@ -216,11 +221,19 @@ public class UserController {
 	//open update form handler
 	
 	@PostMapping("/update-contact/{cid}")
-	public String updateForm(@PathVariable("cid") Integer cid, Model m)
+	public String updateForm(@PathVariable("cid") Integer cid, Model m, Principal principal, HttpSession session)
 	{
 		m.addAttribute("title", "Update Contact");
 		
 		Contact contact = this.contactRepository.findById(cid).get();
+		
+		User user = this.userRepository.getUserByUserName(principal.getName());
+		
+		if(contact.getUser().getId() != user.getId())
+		{
+			session.setAttribute("message", new Message("You are not authorized to edit this contact", "danger"));
+			return "redirect:/user/show-contacts/0";
+		}
 		
 		m.addAttribute("contact",contact);
 		
@@ -237,7 +250,14 @@ public class UserController {
 			//old contact detail
 			Contact oldcontactDetail = this.contactRepository.findById(contact.getcId()).get();
 			
+			User user = this.userRepository.getUserByUserName(principal.getName());
 			
+			//ownership check - prevent editing/reassigning another user's contact
+			if(oldcontactDetail.getUser().getId() != user.getId())
+			{
+				session.setAttribute("message", new Message("You are not authorized to update this contact", "danger"));
+				return "redirect:/user/show-contacts/0";
+			}
 			
 			//image
 			if(!file.isEmpty())
@@ -265,7 +285,6 @@ public class UserController {
 				contact.setImage(oldcontactDetail.getImage());
 			}
 			
-			User user = this.userRepository.getUserByUserName(principal.getName());
 			contact.setUser(user);
 			
 			this.contactRepository.save(contact);
