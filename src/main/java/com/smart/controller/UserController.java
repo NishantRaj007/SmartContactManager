@@ -7,8 +7,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -47,6 +50,28 @@ public class UserController {
 	
 	@Autowired
 	private ContactRepository contactRepository;
+	
+	//only these image types are allowed for upload
+	private static final Set<String> ALLOWED_IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif");
+	
+	//generates a safe, random, collision-free filename while preserving a validated extension
+	//returns null if the file's extension is not in the allow-list
+	private String getSafeFileNameOrNull(MultipartFile file) {
+		String originalName = file.getOriginalFilename();
+		if(originalName == null || !originalName.contains("."))
+		{
+			return null;
+		}
+		
+		String extension = originalName.substring(originalName.lastIndexOf('.') + 1).toLowerCase();
+		
+		if(!ALLOWED_IMAGE_EXTENSIONS.contains(extension))
+		{
+			return null;
+		}
+		
+		return UUID.randomUUID().toString() + "." + extension;
+	}
 	
 	//Method for adding common data to response
 	@ModelAttribute
@@ -104,14 +129,21 @@ public class UserController {
 			}
 			else {
 				
-				contact.setImage(file.getOriginalFilename());
+				String safeFileName = getSafeFileNameOrNull(file);
 				
+				if(safeFileName == null)
+				{
+					session.setAttribute("message", new Message("Only jpg, jpeg, png, and gif images are allowed", "danger"));
+					return "add_contact_form";
+				}
 				
 				File saveFile = new ClassPathResource("static/img").getFile();
 				
-				Path path = Paths.get(saveFile.getAbsolutePath()+File.separator+file.getOriginalFilename());
+				Path path = Paths.get(saveFile.getAbsolutePath()+File.separator+safeFileName);
 				
 				Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+				
+				contact.setImage(safeFileName);
 				
 				System.out.println("Image is Uploaded");
 			}
@@ -262,8 +294,13 @@ public class UserController {
 			//image
 			if(!file.isEmpty())
 			{
-				//file work
-				//rewrite
+				String safeFileName = getSafeFileNameOrNull(file);
+				
+				if(safeFileName == null)
+				{
+					session.setAttribute("message", new Message("Only jpg, jpeg, png, and gif images are allowed", "danger"));
+					return "redirect:/user/"+contact.getcId()+"/contact";
+				}
 				
 				//delete old photo
 				File deleteFile = new ClassPathResource("static/img").getFile();
@@ -273,11 +310,11 @@ public class UserController {
 				//update new photo
                 File saveFile = new ClassPathResource("static/img").getFile();
 				
-				Path path = Paths.get(saveFile.getAbsolutePath()+File.separator+file.getOriginalFilename());
+				Path path = Paths.get(saveFile.getAbsolutePath()+File.separator+safeFileName);
 				
 				Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
 				
-				contact.setImage(file.getOriginalFilename());
+				contact.setImage(safeFileName);
 			
 			}
 			
