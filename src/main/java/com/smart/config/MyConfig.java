@@ -63,6 +63,8 @@ public class MyConfig {
 	        .authorizeHttpRequests(authorize -> authorize
 	            .requestMatchers("/admin/**").hasRole("ADMIN")
 	            .requestMatchers("/", "/about", "/signup", "/signin", "/do_register").permitAll()
+	            .requestMatchers("/forgot", "/send-otp", "/verify-otp", "/change-password").permitAll()
+	            .requestMatchers("/forgot", "/send-otp", "/verify-otp", "/change-password").permitAll()
 	            .requestMatchers("/css/**", "/js/**", "/img/**", "/webjars/**").permitAll() // allow static assets
 	            .anyRequest().authenticated()
 	        )
