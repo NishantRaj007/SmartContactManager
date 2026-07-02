@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeLeaf.org" th:replace="db_base::Layout(~{::section})">
+	<head>
+		
+		<meta charset="UTF-8" />
+		<title>this is home page</title>
+		
+	</head>
+<body>
+	<section>
+		<div class="conatiner">
+			
+					<div class="card">
+						
+						<div class="card-body">
+							
+						<div class="container text-center">
+							<img src="" style="height : 200px; width : 200px" class="my_profile_picture" th:src="@{'/img/default.png'}" alt="profile photo"/>
+						</div>
+							
+						<h1 class="text-center mt-3" th:text="${user.name}"></h1>
+							
+						<table class="table text-center">
+						  <thead>
+						    <tr>
+						      <th scope="col">#USERID</th>
+						      <th scope="col">SCM<span th:text="${user.id}"></span> </th>
+						      
+						    </tr>
+						  </thead>
+						  <tbody>
+						    <tr>
+						      <th scope="row">Email</th>
+						      <td> <Span  th:text="${user.email}"></Span> </td>
+						      
+						    </tr>
+						    <tr>
+						      <th scope="row">Role</th>
+						      <td> <Span  th:text="${user.role}"></Span> </td>
+						      
+						    </tr>
+						    
+						    <tr>
+						      <th scope="row">Account Active</th>
+						      <td> <Span  th:text="${user.enabled}"></Span> </td>
+						      
+						    </tr>
+						    
+						    <tr>
+						      <th scope="row">About you</th>
+						      <td> <Span  th:text="${user.about}"></Span> </td>
+						      
+						    </tr>
+						   
+						  </tbody>
+						  
+						</table>
+							
+						</div>
+						
+					</div>
+			
+		</div>
+		
+		<script>
+			
+			$(document).ready(() => {
+				$(".item").removeClass("active");
+				$("#profile-link").addClass("active");
+				
+			});
+			
+		</script>
+		
+	</section>
+</body>
+</html>
